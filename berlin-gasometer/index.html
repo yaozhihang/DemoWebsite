@@ -11,10 +11,28 @@
         html, body, #cesiumContainer {
             width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
         }
+        .hover-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(38, 38, 38, 0.75);
+            color: #edffff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: sans-serif;
+            font-size: 13px;
+            user-select: none;
+        }
+        .hover-toggle label { cursor: pointer; }
+        .hover-toggle input { vertical-align: middle; margin-right: 6px; }
     </style>
 </head>
 <body>
 <div id="cesiumContainer"></div>
+<div class="hover-toggle">
+    <label><input type="checkbox" id="hoverToggle"> Highlight on hover</label>
+</div>
 <script>
     const viewer = new Cesium.Viewer("cesiumContainer", {
         baseLayerPicker: true,
@@ -50,11 +68,23 @@
     };
     const selectedEntity = new Cesium.Entity();
 
+    let hoverEnabled = false;
+    document.getElementById("hoverToggle").addEventListener("change", function (e) {
+        hoverEnabled = e.target.checked;
+        if (!hoverEnabled && Cesium.defined(highlighted.feature)) {
+            highlighted.feature.color = highlighted.originalColor;
+            highlighted.feature = undefined;
+        }
+    });
+
     // Mouseover: yellow highlight (skipped on the currently click-selected feature)
     viewer.screenSpaceEventHandler.setInputAction(function (movement) {
         if (Cesium.defined(highlighted.feature)) {
             highlighted.feature.color = highlighted.originalColor;
             highlighted.feature = undefined;
+        }
+        if (!hoverEnabled) {
+            return;
         }
 
         const pickedFeature = viewer.scene.pick(movement.endPosition);
