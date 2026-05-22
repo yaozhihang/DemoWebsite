@@ -1,0 +1,35 @@
+{
+  "stats":{
+    "totalValuesCount":51,
+    "mostFrequentValues":[
+      {
+        "value":"1855",
+        "count":10
+      },
+      {
+        "value":"1090",
+        "count":7
+      },
+      {
+        "value":"OTHERS",
+        "count":3
+      },
+      {
+        "value":"1000",
+        "count":2
+      },
+      {
+        "value":"1540",
+        "count":2
+      },
+      {
+        "value":"2480",
+        "count":1
+      },
+      {
+        "value":"LOD3",
+        "count":1
+      }
+    ]
+  }
+}

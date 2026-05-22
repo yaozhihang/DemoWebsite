@@ -1,0 +1,19 @@
+{
+  "stats":{
+    "totalValuesCount":51,
+    "mostFrequentValues":[
+      {
+        "value":"1640",
+        "count":10
+      },
+      {
+        "value":"1800",
+        "count":4
+      },
+      {
+        "value":"9999",
+        "count":1
+      }
+    ]
+  }
+}
