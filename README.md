@@ -1,5 +1,10 @@
 # DemoWebsite
 
-- [Berlin Gasometer](https://yaozhihang.github.io/DemoWebsite/berlin-gasometer/)
-- [HFT BIM Buildings](https://yaozhihang.github.io/DemoWebsite/hft-bim-buildings/)
-- [Railway Scene LOD3](https://yaozhihang.github.io/DemoWebsite/railway-scene-lod3/)
+A live demo of the [3D City Web Map](https://yaozhihang.github.io/DemoWebsite/3d-city-web-map/?d=2026-05-22T11%3A47%3A02Z&t=3DCityDB%20Web%20Map%20Client%20(Next)&s=false&ts=0&la=52.473396&lo=13.357547&h=469.506&hd=357&p=-27.16&r=360&l_0=u%3Dhttps%253A%252F%252Fraw.githubusercontent.com%252Fyaozhihang%252FDemoWebsite%252Frefs%252Fheads%252Fmain%252Fsample-data%252F3dtiles%252Fberlin-gasometer%252Ftileset.json%26n%3DBerlin%2520LOD2%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lc%3Dfalse%26a%3Dtrue%26msse%3D16&l_1=u%3Dhttps%253A%252F%252Fraw.githubusercontent.com%252Fyaozhihang%252FDemoWebsite%252Frefs%252Fheads%252Fmain%252Fsample-data%252F3dtiles%252Frailway-scene-lod3%252Ftileset.json%26n%3DRailway%2520Scene%2520LOD3%26ld%3DCesium%25203D%2520Tiles%26lc%3Dfalse%26a%3Dtrue%26msse%3D16&l_2=u%3Dhttps%253A%252F%252Fraw.githubusercontent.com%252Fyaozhihang%252FDemoWebsite%252Frefs%252Fheads%252Fmain%252Fsample-data%252F3dtiles%252Fhft-bim-buildings%252Ftileset.json%26n%3DHFT%2520BIM%2520Buildings%26ld%3DCesium%25203D%2520Tiles%26lc%3Dfalse%26a%3Dtrue%26msse%3D16),
+preloaded with sample Cesium 3D Tiles layers exported directly from [3DCityDB v5](https://github.com/3dcitydb):
+
+- **Berlin LOD2 Buildings** — CityGML LOD2 building models of a Berlin district.
+- **Railway Scene LOD3** — Detailed LOD3 railway infrastructure scene with textures and materials.
+- **HFT BIM Buildings** — BIM-derived building models from HFT Stuttgart.
+
+Open the link above to explore the layers in your browser — pan, zoom, toggle visibility, and inspect feature attributes interactively.
