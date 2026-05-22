@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
-    <title>I3S Viewer</title>
+    <title>3D Tiles Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/cesium@1.141.0/Build/Cesium/Cesium.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/cesium@1.141.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
@@ -31,7 +31,7 @@
 <body>
 <div id="cesiumContainer"></div>
 <div class="hover-toggle">
-    <label><input type="checkbox" id="hoverToggle" checked> Highlight on hover</label>
+    <label><input type="checkbox" id="hoverToggle"> Highlight on hover</label>
 </div>
 <script>
     const viewer = new Cesium.Viewer("cesiumContainer", {
@@ -46,54 +46,18 @@
 
     (async () => {
         try {
-            const i3sProvider = await Cesium.I3SDataProvider.fromUrl("./data/layers/0", {
-                traceFetches: false,
+            const tileset = await Cesium.Cesium3DTileset.fromUrl("./data/tileset.json", {
                 showFeatures: true,
-                // Required for per-feature-type styling alpha < 1: without
-                // it, Cesium's I3SGeometry.js force-rewrites alphaMode=BLEND
-                // back to OPAQUE on any primitive that wasn't split by the
-                // worker, killing per-vertex transparency.
-                adjustMaterialAlphaMode: true,
-                // Cesium's I3SDataProvider auto-defaults calculateNormals to
-                // true on Building Scene Layers and on any 3DObject layer
-                // that lacks textureSetDefinitions (I3SDataProvider.js:381,
-                // 394-399). With our default export (--enable-shading off),
-                // the legacy buffer carries no NORMAL — but Cesium silently
-                // generates flat normals on the client, undoing the unlit
-                // intent. Pin to false so this flag's effect is visible
-                // client-side too. Set to true only when you actually want
-                // Cesium-side flat shading regardless of the export.
-                calculateNormals: false,
-                cesium3dTilesetOptions: {
-                    // Mirror the 3D Tiles viewer's cache tuning — I3S in
-                    // Cesium wraps a Cesium3DTileset under the hood, so
-                    // the same knobs apply. Default 512 MB can be tight
-                    // for the Munich/Berlin scenes with per-level split.
-                    skipLevelOfDetail: true,
-                    preloadWhenHidden: true,
-                    preloadFlightDestinations: true,
-                    cacheBytes: 2 * 1024 * 1024 * 1024,
-                    maximumCacheOverflowBytes: 512 * 1024 * 1024,
-                },
             });
-            viewer.scene.primitives.add(i3sProvider);
-            if (i3sProvider.extent) {
-                viewer.camera.flyTo({ destination: i3sProvider.extent });
-            }
-            console.log("I3S loaded.");
-
-            // DevTools helpers — after scene loads, each layer's
-            // tileset is accessible for memory/perf diagnostics:
-            //   i3sProvider.layers[0].tileset.totalMemoryUsageInBytes
-            //   i3sProvider.layers[0].tileset.statistics.numberOfPendingRequests
-            //   i3sProvider.layers[0].tileset.statistics.numberOfTilesUnloaded
-            window.i3sProvider = i3sProvider;
+            viewer.scene.primitives.add(tileset);
+            viewer.flyTo(tileset);
+            console.log("3D Tiles loaded.");
         } catch (e) {
-            console.error("Failed to load I3S:", e);
+            console.error("Failed to load 3D Tiles:", e);
         }
     })();
 
-    // Feature picking with highlight (following Cesium I3S Building Scene Layer pattern)
+    // Feature picking with highlight
     const selected = {
         feature: undefined,
         originalColor: new Cesium.Color(),
@@ -104,13 +68,7 @@
     };
     const selectedEntity = new Cesium.Entity();
 
-    function isI3sFeature(f) {
-        return Cesium.defined(f)
-            && Cesium.defined(f.content)
-            && Cesium.defined(f.content.tile.i3sNode);
-    }
-
-    let hoverEnabled = true;
+    let hoverEnabled = false;
     document.getElementById("hoverToggle").addEventListener("change", function (e) {
         hoverEnabled = e.target.checked;
         if (!hoverEnabled && Cesium.defined(highlighted.feature)) {
@@ -119,7 +77,7 @@
         }
     });
 
-    // Mouseover: green highlight (skipped on the currently click-selected feature)
+    // Mouseover: yellow highlight (skipped on the currently click-selected feature)
     viewer.screenSpaceEventHandler.setInputAction(function (movement) {
         if (Cesium.defined(highlighted.feature)) {
             highlighted.feature.color = highlighted.originalColor;
@@ -130,7 +88,7 @@
         }
 
         const pickedFeature = viewer.scene.pick(movement.endPosition);
-        if (!isI3sFeature(pickedFeature)) {
+        if (!Cesium.defined(pickedFeature) || !Cesium.defined(pickedFeature.getProperty)) {
             return;
         }
         if (pickedFeature === selected.feature) {
@@ -154,13 +112,13 @@
             selected.feature = undefined;
         }
 
-        if (!isI3sFeature(pickedFeature)) {
+        if (!Cesium.defined(pickedFeature) || !Cesium.defined(pickedFeature.getProperty)) {
             viewer.selectedEntity = undefined;
             return;
         }
 
-        // If this feature is currently green-highlighted, drop the hover state
-        // so we capture its real original color (not green) before turning it blue.
+        // If this feature is currently yellow-highlighted, drop the hover state
+        // so we capture its real original color (not yellow) before turning it blue.
         if (pickedFeature === highlighted.feature) {
             pickedFeature.color = highlighted.originalColor;
             highlighted.feature = undefined;
@@ -171,29 +129,24 @@
         Cesium.Color.clone(pickedFeature.color, selected.originalColor);
         pickedFeature.color = Cesium.Color.BLUE;
 
-        // Show attributes
-        const i3sNode = pickedFeature.content.tile.i3sNode;
-        console.log("Picked featureId:", pickedFeature.featureId, "node:", i3sNode);
-        i3sNode.loadFields().then(function () {
-            console.log("Fields loaded, node.fields:", i3sNode.fields);
-            const fields = i3sNode.getFieldsForFeature(pickedFeature.featureId);
-            console.log("Fields for feature:", fields);
-            let description = "No attributes";
-            if (Object.keys(fields).length > 0) {
-                description = '<table class="cesium-infoBox-defaultTable"><tbody>';
-                for (const fieldName in fields) {
-                    if (i3sNode.fields.hasOwnProperty(fieldName)) {
-                        description += "<tr><th>" + fieldName + "</th><td>" + fields[fieldName] + "</td></tr>";
-                    }
-                }
-                description += "</tbody></table>";
+        // Show attributes from EXT_structural_metadata property table
+        const propertyIds = pickedFeature.getPropertyIds();
+        console.log("Picked feature properties:", propertyIds);
+
+        let description = "No attributes";
+        if (propertyIds.length > 0) {
+            description = '<table class="cesium-infoBox-defaultTable"><tbody>';
+            for (const propId of propertyIds) {
+                const value = pickedFeature.getProperty(propId);
+                description += "<tr><th>" + propId + "</th><td>" + value + "</td></tr>";
             }
-            selectedEntity.name = fields["OBJECTID"] || "Feature";
-            selectedEntity.description = description;
-            viewer.selectedEntity = selectedEntity;
-        }).catch(function (err) {
-            console.error("loadFields failed:", err);
-        });
+            description += "</tbody></table>";
+        }
+
+        const objectId = pickedFeature.getProperty("OBJECTID");
+        selectedEntity.name = objectId || "Feature";
+        selectedEntity.description = description;
+        viewer.selectedEntity = selectedEntity;
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 </script>
 </body>
