@@ -1,0 +1,26 @@
+{
+  "asset":{
+    "version":"1.1",
+    "generator":"3DCityDB citydb-tool"
+  },
+  "geometricError":1.3654091909058292,
+  "root":{
+    "boundingVolume":{
+      "region":[0.1609056060475197,0.8512942173895425,0.16090683546606277,0.8512950565745544,0.0,6.0]
+    },
+    "geometricError":1.3654091909058292,
+    "refine":"REPLACE",
+    "children":[
+      {
+        "boundingVolume":{
+          "region":[0.1609056060475197,0.8512942173895425,0.16090683546606277,0.8512950565745544,0.0,6.0]
+        },
+        "geometricError":0.0,
+        "refine":"REPLACE",
+        "content":{
+          "uri":"../../../../../../tiles/0/1/1/0/1/2/0.glb"
+        }
+      }
+    ]
+  }
+}
