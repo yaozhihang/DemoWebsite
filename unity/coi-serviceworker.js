@@ -33,7 +33,7 @@ if (typeof window === 'undefined') {
             })
             : r;
         event.respondWith(
-            fetch(request)
+            fetch(request, { cache: "no-store" })
                 .then((response) => {
                     if (response.status === 0) {
                         return response;
